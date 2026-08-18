@@ -12,6 +12,8 @@ import { useRaiseHand } from '../hooks/useRaiseHand';
 import { useLocalRecording } from '../hooks/useLocalRecording';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { StopCircleIcon, PlayCircleIcon } from '@heroicons/react/24/outline';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 // ─── Inner UI (needs LiveKit context) ────────────────────────────────────────
 const CustomRoomUI: React.FC<{ onHangup: () => void; guideName: string }> = ({ onHangup, guideName }) => {
@@ -165,13 +167,28 @@ const CustomRoomUI: React.FC<{ onHangup: () => void; guideName: string }> = ({ o
   );
 };
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main component ─────────────────────────────────────────────────────────
 const GuideRoom: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const token = sessionStorage.getItem('room_token');
   const guideName = localStorage.getItem('guide_name') || 'Guide';
   const [presentAlert] = useIonAlert();
+
+  // ── Android: RECORD_AUDIO runtime permission check ────────────────────────
+  // AndroidManifest has the permission declared, but Android 6+ requires
+  // the user to explicitly grant it at runtime via getUserMedia prompt.
+  const [micPermission, setMicPermission] = React.useState<'checking' | 'granted' | 'denied'>('checking');
+
+  React.useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        // Stop the tracks immediately — we just needed to trigger permission
+        stream.getTracks().forEach(t => t.stop());
+        setMicPermission('granted');
+      })
+      .catch(() => setMicPermission('denied'));
+  }, []);
 
   const handleHangup = () => {
     presentAlert({
@@ -193,11 +210,64 @@ const GuideRoom: React.FC = () => {
     });
   };
 
+  // ── Android: intercept hardware back button ───────────────────────────────
+  React.useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const listenerPromise = App.addListener('backButton', () => {
+      handleHangup();
+    });
+    return () => { listenerPromise.then(l => l.remove()); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (!token) {
     return (
       <IonPage>
         <IonContent>
           <div className="flex items-center justify-center h-full text-zinc-500 text-sm">Token tidak ditemukan.</div>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  // ── Mic permission denied — show error before entering LiveKit ────────────
+  if (micPermission === 'denied') {
+    return (
+      <IonPage>
+        <IonContent fullscreen>
+          <div className="flex flex-col items-center justify-center h-full px-8 bg-white">
+            <div className="w-16 h-16 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center mb-5">
+              <MicrophoneIcon className="w-8 h-8 text-red-400" />
+            </div>
+            <h2 className="text-base font-semibold text-zinc-800 mb-2 text-center">Izin Mikrofon Ditolak</h2>
+            <p className="text-xs text-zinc-500 mb-6 text-center">
+              Aplikasi memerlukan akses mikrofon untuk broadcast. Buka pengaturan aplikasi dan izinkan akses mikrofon.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full max-w-xs py-3 rounded-2xl font-semibold text-sm bg-blue-600 text-white mb-3"
+            >
+              🔄 Coba Lagi
+            </button>
+            <button
+              onClick={() => history.replace('/guide/dashboard')}
+              className="w-full max-w-xs py-2.5 rounded-2xl font-medium text-sm text-zinc-500 border border-zinc-200"
+            >
+              Kembali ke Dashboard
+            </button>
+          </div>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  if (micPermission === 'checking') {
+    return (
+      <IonPage>
+        <IonContent fullscreen>
+          <div className="flex items-center justify-center h-full text-zinc-400 text-sm">
+            Memeriksa izin mikrofon...
+          </div>
         </IonContent>
       </IonPage>
     );

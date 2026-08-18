@@ -9,6 +9,9 @@ import { SpeakerWaveIcon as SpeakerWaveSolid, ArrowRightOnRectangleIcon, HandRai
 import { StatusIndicator } from '../components/StatusIndicator';
 import { AudioWave } from '../components/AudioWave';
 import { useRaiseHand } from '../hooks/useRaiseHand';
+import { KeepAwake } from '@capacitor-community/keep-awake';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 // ─── Inner component (needs LiveKit context) ────────────────────────────────
 const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLeave, myName }) => {
@@ -21,6 +24,12 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   const [audioBlocked, setAudioBlocked] = useState(false);
   const audioCheckDone = useRef(false);
 
+  // ── Keep screen awake during session (Android APK + iOS) ─────────────────
+  useEffect(() => {
+    KeepAwake.keepAwake().catch(console.error);
+    return () => { KeepAwake.allowSleep().catch(console.error); };
+  }, []);
+
   // ── Audio unlock: initial check ──────────────────────────────────────────
   useEffect(() => {
     if (connectionState !== ConnectionState.Connected || audioCheckDone.current) return;
@@ -31,6 +40,25 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
       setAudioBlocked(true);
     }
     ctx.close();
+  }, [connectionState]);
+
+  // ── Android APK: App state change (background → foreground) ────────────
+  // Capacitor's appStateChange is more reliable than visibilitychange on APK.
+  // When app resumes from background, check if AudioContext needs re-unlock.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return; // only for APK, not PWA
+
+    const listenerPromise = App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive && connectionState === ConnectionState.Connected) {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (ctx.state === 'suspended') {
+          setAudioBlocked(true);
+          audioCheckDone.current = false;
+        }
+        ctx.close();
+      }
+    });
+    return () => { listenerPromise.then(l => l.remove()); };
   }, [connectionState]);
 
   // ── iOS: Re-unlock audio when app comes back from background/lock screen ──
@@ -360,6 +388,18 @@ const ParticipantRoom: React.FC = () => {
       ]
     });
   };
+
+  // ── Android: intercept hardware back button ───────────────────────────────
+  // Without this, pressing back on Android exits the room without confirmation.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const listenerPromise = App.addListener('backButton', () => {
+      handleLeave(); // show confirm dialog instead of navigating back directly
+    });
+    return () => { listenerPromise.then(l => l.remove()); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!token) {
     return (
