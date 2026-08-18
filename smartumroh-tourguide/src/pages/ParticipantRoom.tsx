@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IonContent, IonPage, useIonAlert } from '@ionic/react';
-import { LiveKitRoom, RoomAudioRenderer, useParticipants } from '@livekit/components-react';
+import { LiveKitRoom, RoomAudioRenderer, useParticipants, useConnectionState, useRoomContext } from '@livekit/components-react';
+import { ConnectionState } from 'livekit-client';
 import '@livekit/components-styles';
 import { useHistory } from 'react-router';
 import { UserCircleIcon, UsersIcon, SpeakerWaveIcon, HandRaisedIcon } from '@heroicons/react/24/outline';
@@ -13,6 +14,38 @@ import { useRaiseHand } from '../hooks/useRaiseHand';
 const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLeave, myName }) => {
   const [tab, setTab] = useState<'listen' | 'people'>('listen');
   const participants = useParticipants();
+  const room = useRoomContext();
+  const connectionState = useConnectionState();
+
+  // iOS Safari requires a user gesture to start audio playback
+  const [audioBlocked, setAudioBlocked] = useState(false);
+  const audioCheckDone = useRef(false);
+
+  useEffect(() => {
+    if (connectionState !== ConnectionState.Connected || audioCheckDone.current) return;
+    audioCheckDone.current = true;
+
+    // Try playing a silent audio buffer to detect if autoplay is blocked
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (ctx.state === 'suspended') {
+      setAudioBlocked(true);
+    }
+    ctx.close();
+  }, [connectionState]);
+
+  const unlockAudio = () => {
+    // Resume all suspended audio contexts (LiveKit uses them internally)
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    ctx.resume().then(() => {
+      ctx.close();
+    });
+    // Trigger room's startAudio to unblock LiveKit audio
+    room.startAudio().then(() => {
+      setAudioBlocked(false);
+    }).catch(() => {
+      setAudioBlocked(false);
+    });
+  };
 
   const {
     queue, isHandRaised, myPosition, iAmCalled, questionsOpen,
@@ -22,6 +55,28 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   // Guide = publisher with canPublish permission
   const guideParticipant = participants.find(p => !p.isLocal && p.permissions?.canPublish);
   const otherParticipants = participants.filter(p => p !== guideParticipant);
+
+  // Show audio unlock prompt overlay for iOS Safari
+  if (audioBlocked) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#fafafa] px-8">
+        <div className="w-20 h-20 rounded-full bg-blue-50 border-2 border-blue-200 flex items-center justify-center mb-6 shadow-sm">
+          <SpeakerWaveIcon className="w-9 h-9 text-blue-600" />
+        </div>
+        <h2 className="text-base font-semibold text-zinc-900 mb-2 text-center">Ketuk untuk Mengaktifkan Suara</h2>
+        <p className="text-xs text-zinc-500 mb-6 text-center">
+          Perangkat Anda memerlukan izin untuk memutar audio. Ketuk tombol di bawah untuk mendengar suara Guide.
+        </p>
+        <button
+          onClick={unlockAudio}
+          className="w-full max-w-xs flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all"
+        >
+          <SpeakerWaveSolid className="w-5 h-5" />
+          Aktifkan Suara
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-[#fafafa]">
