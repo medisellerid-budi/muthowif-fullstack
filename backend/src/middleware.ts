@@ -9,7 +9,7 @@ export function middleware(request: Request) {
       headers: {
         "Access-Control-Allow-Origin": origin,
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Bypass-Tunnel-Reminder, ngrok-skip-browser-warning",
         "Access-Control-Allow-Credentials": "true",
       },
     });
@@ -20,7 +20,7 @@ export function middleware(request: Request) {
   response.headers.set("Access-Control-Allow-Credentials", "true");
   response.headers.set(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With"
+    "Content-Type, Authorization, X-Requested-With, Bypass-Tunnel-Reminder, ngrok-skip-browser-warning"
   );
 
   return response;
