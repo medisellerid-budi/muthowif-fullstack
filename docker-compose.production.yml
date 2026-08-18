@@ -74,7 +74,7 @@ services:
     container_name: livekit-server-prod
     command: --node-ip=0.0.0.0 --redis.address=redis:6379
     environment:
-      - LIVEKIT_KEYS=${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
+      - "LIVEKIT_KEYS=${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
     ports:
       - "7881:7881/udp" # WebRTC UDP (Traefik tidak me-route UDP dengan mudah, langsung bind port)
     labels:
