@@ -55,12 +55,17 @@ services:
   livekit:
     image: livekit/livekit-server:latest
     container_name: livekit-server-prod
-    command: --node-ip=0.0.0.0 --redis.address=redis:6379
+    # Gunakan config file agar UDP/TCP port TETAP (bukan random)
+    # --node-ip wajib diisi IP public VPS agar ICE candidates benar
+    command: --config /config/livekit.yaml --node-ip=${VPS_PUBLIC_IP} --redis.address=redis:6379
+    volumes:
+      - ./livekit.yaml:/config/livekit.yaml:ro
     environment:
       - "LIVEKIT_KEYS=${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}"
     ports:
-      - "7880:7880"
-      - "7881:7881/udp"
+      - "7880:7880"         # WebSocket signaling
+      - "7881:7881/udp"     # WebRTC media UDP - port TETAP (bukan random!)
+      - "7882:7882/tcp"     # WebRTC media TCP fallback
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:7880/ > /dev/null 2>&1 || exit 0"]
