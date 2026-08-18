@@ -69,10 +69,13 @@ const PrivateRoute: React.FC<{ component: React.FC; path: string; exact?: boolea
   );
 };
 
+import { PWAPrompt } from './components/PWAPrompt';
+
 const App: React.FC = () => (
   <ThemeProvider>
     <IonApp>
       <NetworkBanner />
+      <PWAPrompt />
       <AuthProvider>
         <IonReactRouter>
         <IonRouterOutlet>

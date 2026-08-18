@@ -154,16 +154,19 @@ UX / Notifikasi               ████████████████�
 ~~2. **Halaman Register Guide** — Agar guide bisa daftar mandiri~~ ✅ Done  
 ~~3. **Fix `isOnline` participant** — Integrasikan dengan LiveKit~~ ✅ Done  
 ~~4. **Fix `endsAt` raw SQL** — Ganti ke Prisma query~~ ✅ Done  
+~~5. **Setup Deployment VPS** — Docker Compose, Nginx Proxy Manager, SSL~~ ✅ Done
 
 ### 🟡 Prioritas Sedang
-~~5. **Implementasi Expected Participants** — Form Input + Tab "Belum Join"~~ ✅ Done  
-~~6. **Share session via WhatsApp** — Tombol bagikan via Web Share API/WA~~ ✅ Done  
+~~6. **Implementasi Expected Participants** — Form Input + Tab "Belum Join"~~ ✅ Done  
+~~7. **Share session via WhatsApp** — Tombol bagikan via Web Share API/WA~~ ✅ Done  
+~~8. **DevOps Hardening** — Auto-backup DB harian & Healthchecks container~~ ✅ Done
 
 ### 🟢 Nice to Have
-~~7. **Dark Mode**~~ ✅ Done  
-~~8. **Offline Handling**~~ ✅ Done  
-9. **Rekaman sesi** — LiveKit Egress recording (Post-MVP)
-10. **Analytics dashboard** — Statistik per sesi (Post-MVP)
+~~9. **Dark Mode**~~ ✅ Done  
+~~10. **Offline Handling**~~ ✅ Done  
+~~11. **PWA Auto-Update Prompt**~~ ✅ Done  
+12. **Rekaman sesi** — LiveKit Egress recording (Post-MVP)
+13. **Analytics dashboard** — Statistik per sesi (Post-MVP)
 
 ---
 

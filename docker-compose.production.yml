@@ -16,6 +16,12 @@ services:
     ports:
       - "8650:80"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # Backend Next.js API
   backend:
@@ -31,11 +37,19 @@ services:
       - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - db
-      - livekit
+      db:
+        condition: service_healthy
+      livekit:
+        condition: service_started
     ports:
       - "8651:8651"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8651/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # LiveKit Server
   livekit:
@@ -48,12 +62,22 @@ services:
       - "7880:7880"
       - "7881:7881/udp"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7880/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Redis (dibutuhkan LiveKit Production)
   redis:
     image: redis:7-alpine
     container_name: livekit-redis-prod
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Database PostgreSQL
   db:
@@ -66,6 +90,31 @@ services:
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d smartumroh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Database Backup Auto
+  db-backup:
+    image: prodrigestivill/postgres-backup-local
+    container_name: smartumroh-muthowif-db-backup-prod
+    restart: unless-stopped
+    user: postgres:postgres
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=smartumroh
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=StrongProdPassword123
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
 
 volumes:
   postgres_data_prod:
