@@ -114,6 +114,8 @@ muthowifApp/
 | ~~**`isOnline` tidak ada di DB schema**~~ | ~~`GuideSessionDetail.tsx`~~ | ✅ **SUDAH ADA** — diambil dari LiveKit `roomService.listParticipants()` |
 | ~~**Token di localStorage**~~ | ~~`GuideRoom.tsx`~~ | ✅ **FIXED** — pindah ke `sessionStorage` |
 | ~~**500 error saat buat sesi**~~ | ~~`POST /api/sessions`~~ | ✅ **FIXED** — `prisma generate` dijalankan di dalam Docker container |
+| ~~**Network Error saat Login**~~ | ~~`api.ts` & `middleware.ts`~~ | ✅ **FIXED** — Dihapus header ngrok & ditambah bypass di CORS |
+| ~~**Blank page saat logout Admin**~~ | ~~`SuperadminDashboard.tsx`~~ | ✅ **FIXED** — Dihapus `history.replace('/')` yang bentrok dengan `<PrivateRoute>` |
 
 ---
 
