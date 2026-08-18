@@ -23,4 +23,4 @@ COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 EXPOSE 8651
-CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && npm run dev"]
+CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && npm start"]
