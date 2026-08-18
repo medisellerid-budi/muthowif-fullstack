@@ -1,6 +1,6 @@
 # 📊 PROJECT STATE — SmartUmroh TourGuide (muthowifApp)
 
-> **Last Updated:** 2026-08-17 (Sprint 5 — Final MVP)
+> **Last Updated:** 2026-08-18 (Sprint 6 — Production Deployment Fixes)
 > **Estimasi Progress Keseluruhan: 100% (MVP)**
 
 ---
@@ -116,6 +116,10 @@ muthowifApp/
 | ~~**500 error saat buat sesi**~~ | ~~`POST /api/sessions`~~ | ✅ **FIXED** — `prisma generate` dijalankan di dalam Docker container |
 | ~~**Network Error saat Login**~~ | ~~`api.ts` & `middleware.ts`~~ | ✅ **FIXED** — Dihapus header ngrok & ditambah bypass di CORS |
 | ~~**Blank page saat logout Admin**~~ | ~~`SuperadminDashboard.tsx`~~ | ✅ **FIXED** — Dihapus `history.replace('/')` yang bentrok dengan `<PrivateRoute>` |
+| ~~**Network Error production (CORS duplikat)**~~ | ~~`backend/next.config.ts`~~ | ✅ **FIXED** — `next.config.ts` dan `middleware.ts` dua-duanya set `Access-Control-Allow-Origin`, browser reject duplikat. Dihapus dari `next.config.ts` |
+| ~~**Tidak ada suara (LiveKit)**~~ | ~~`docker-compose.production.yml`~~ | ✅ **FIXED** — LiveKit pakai UDP port random yang tidak di-expose Docker. Diperbaiki dengan `livekit.yaml` + `udp_port: 7881` |
+| ~~**ICE candidates gagal (WebRTC)**~~ | ~~LiveKit `--node-ip`~~ | ✅ **FIXED** — `--node-ip=0.0.0.0` diganti `--node-ip=31.97.67.77` (IP public VPS) |
+| **Ukuran backup database** | `backups/` dir di VPS | ⏳ **PENDING** — Strategi manajemen disk agar backup tidak overflow VPS |
 
 ---
 
@@ -193,13 +197,72 @@ docker restart smartumroh-backend
 > **Kenapa?** Docker container punya volume `node_modules` yang terisolasi dari host.
 > `prisma generate` di host hanya mengupdate `node_modules` lokal, bukan yang ada di dalam container.
 
+### Deploy ke Production (VPS)
+
+```bash
+# Dari laptop — push perubahan
+git add . && git commit -m "your message" && git push
+
+# Di VPS — pull & restart
+cd ~/muthowif-fullstack
+git pull
+docker compose --env-file .env.production -f docker-compose.production.yml up -d --build
+```
+
+> ⚠️ `.env.production` di VPS **TIDAK** ter-sync via git (di-gitignore). Jika ada perubahan env, update manual di VPS.
+
+### Domain & SSL (Production)
+
+| Domain | Fungsi | DNS | SSL |
+|---|---|---|---|
+| `tg.jaritechnology.com` | Frontend | Cloudflare 🟠 Proxied | Via Cloudflare |
+| `tgapi.jaritechnology.com` | Backend API | Cloudflare 🟠 Proxied | Via Cloudflare |
+| `tglivekit.jaritechnology.com` | LiveKit WebSocket | Cloudflare 🟠 Proxied | Via Cloudflare |
+
+> ⚠️ **Penting:** Cloudflare **tidak bisa proxy UDP**. LiveKit WebRTC media (audio) menggunakan UDP port 7881 yang harus langsung ke VPS via ICE candidates (bukan DNS). Pastikan port 7880, 7881/udp, 7882/tcp terbuka di firewall VPS.
+
+### LiveKit WebRTC — Konfigurasi Kritis
+
+File `livekit.yaml` WAJIB ada dan di-mount ke container:
+```yaml
+rtc:
+  udp_port: 7881   # Port TETAP, bukan random!
+  tcp_port: 7882
+  use_external_ip: true
+```
+
+Tanpa ini, LiveKit akan memakai UDP port **random** (misal 55346) yang tidak di-expose Docker → audio tidak bekerja.
+
+### CORS Backend
+
+CORS dihandle **HANYA** oleh `src/middleware.ts`. Jangan tambahkan CORS headers di `next.config.ts` karena akan menghasilkan duplikat header yang diblokir browser.
+
 ### Environment Variables Penting
 
-| Variable | Lokasi | Nilai (Development) |
+**Development:**
+| Variable | Lokasi | Nilai |
 |---|---|---|
 | `DATABASE_URL` | `backend/.env` | `postgresql://postgres:password@db:5432/smartumroh` |
 | `LIVEKIT_URL` | `backend/.env` | `ws://localhost:7880` |
 | `LIVEKIT_API_KEY` | `backend/.env` | `devkey` |
 | `LIVEKIT_API_SECRET` | `backend/.env` | `secretkey123` |
 | `JWT_SECRET` | `backend/.env` | `smartumroh-secret-key-2024` |
-| `VITE_API_URL` | Frontend env | `http://localhost:8651` |
+| `VITE_API_URL` | `smartumroh-tourguide/.env.development` | `http://localhost:8651/api` |
+
+**Production (VPS — file `.env.production`, tidak di-commit ke git):**
+| Variable | Nilai |
+|---|---|
+| `BACKEND_URL` | `https://tgapi.jaritechnology.com/api` |
+| `LIVEKIT_DOMAIN` | `tglivekit.jaritechnology.com` |
+| `VPS_PUBLIC_IP` | `31.97.67.77` |
+| `DATABASE_URL` | `postgresql://postgres:StrongProdPassword123@db:5432/smartumroh` |
+
+---
+
+## ⏳ TODO — Post-MVP
+
+| Item | Prioritas | Status |
+|---|---|---|
+| **Manajemen ukuran backup database** | 🔴 Operasional | ⏳ Pending — strategi agar `./backups/` tidak overflow disk VPS |
+| **Rekaman sesi** | 🟢 Rendah | Belum — LiveKit Egress recording |
+| **Analytics dashboard** | 🟢 Rendah | Belum — statistik per sesi |
