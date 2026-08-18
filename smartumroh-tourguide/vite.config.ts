@@ -6,12 +6,15 @@ import { defineConfig } from 'vite'
 
 import tailwindcss from '@tailwindcss/vite'
 
+import { VitePWA } from 'vite-plugin-pwa'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
-    legacy()
+    legacy(),
+    VitePWA({ registerType: 'autoUpdate' })
   ],
   test: {
     globals: true,
