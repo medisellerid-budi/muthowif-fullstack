@@ -17,7 +17,7 @@ async function verifySuperAdmin(request: Request) {
   }
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await verifySuperAdmin(request);
     if (!admin) {
