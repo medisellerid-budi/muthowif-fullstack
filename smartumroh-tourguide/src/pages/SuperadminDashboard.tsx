@@ -53,7 +53,6 @@ const SuperadminDashboard: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    history.replace('/');
   };
 
   return (
