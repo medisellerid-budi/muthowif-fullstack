@@ -21,16 +21,35 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   const [audioBlocked, setAudioBlocked] = useState(false);
   const audioCheckDone = useRef(false);
 
+  // ── Audio unlock: initial check ──────────────────────────────────────────
   useEffect(() => {
     if (connectionState !== ConnectionState.Connected || audioCheckDone.current) return;
     audioCheckDone.current = true;
 
-    // Try playing a silent audio buffer to detect if autoplay is blocked
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
     if (ctx.state === 'suspended') {
       setAudioBlocked(true);
     }
     ctx.close();
+  }, [connectionState]);
+
+  // ── iOS: Re-unlock audio when app comes back from background/lock screen ──
+  // iOS suspends AudioContext when user switches apps or locks screen.
+  // We listen to visibilitychange to re-prompt unlock if needed.
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && connectionState === ConnectionState.Connected) {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (ctx.state === 'suspended') {
+          setAudioBlocked(true);
+          audioCheckDone.current = false; // allow re-check
+        }
+        ctx.close();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [connectionState]);
 
   const unlockAudio = () => {
@@ -56,7 +75,54 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   const guideParticipant = participants.find(p => !p.isLocal && p.permissions?.canPublish);
   const otherParticipants = participants.filter(p => p !== guideParticipant);
 
-  // Show audio unlock prompt overlay for iOS Safari
+  // ── Reconnecting overlay ──────────────────────────────────────────────────
+  if (connectionState === ConnectionState.Reconnecting) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#fafafa] px-8">
+        <div className="w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-200 flex items-center justify-center mb-5 shadow-sm">
+          <svg className="w-8 h-8 text-amber-500 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+        </div>
+        <h2 className="text-base font-semibold text-zinc-800 mb-1 text-center">Menyambungkan Ulang...</h2>
+        <p className="text-xs text-zinc-500 text-center">
+          Koneksi terputus. LiveKit sedang mencoba menghubungkan kembali. Mohon tunggu sebentar.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Disconnected overlay ──────────────────────────────────────────────────
+  if (connectionState === ConnectionState.Disconnected) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#fafafa] px-8">
+        <div className="w-16 h-16 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center mb-5 shadow-sm">
+          <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <h2 className="text-base font-semibold text-zinc-800 mb-2 text-center">Koneksi Terputus</h2>
+        <p className="text-xs text-zinc-500 mb-6 text-center">
+          Tidak dapat terhubung ke server. Pastikan koneksi internet Anda stabil, lalu coba lagi.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="w-full max-w-xs py-3 rounded-2xl font-semibold text-sm bg-blue-600 text-white shadow-lg shadow-blue-100 mb-3"
+        >
+          🔄 Coba Lagi
+        </button>
+        <button
+          onClick={onLeave}
+          className="w-full max-w-xs py-2.5 rounded-2xl font-medium text-sm text-zinc-500 border border-zinc-200 bg-white"
+        >
+          Keluar dari Sesi
+        </button>
+      </div>
+    );
+  }
+
+  // ── Audio unlock prompt ───────────────────────────────────────────────────
   if (audioBlocked) {
     return (
       <div className="flex flex-col items-center justify-center h-full bg-[#fafafa] px-8">
@@ -83,7 +149,23 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
 
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between border-b border-zinc-100 bg-white">
-        <StatusIndicator label="TERHUBUNG" colorClass="text-blue-600" pulseColorClass="bg-blue-500" />
+        <StatusIndicator
+          label={
+            connectionState === ConnectionState.Connected ? 'TERHUBUNG' :
+            connectionState === ConnectionState.Connecting ? 'MENGHUBUNGKAN...' :
+            'TERPUTUS'
+          }
+          colorClass={
+            connectionState === ConnectionState.Connected ? 'text-blue-600' :
+            connectionState === ConnectionState.Connecting ? 'text-amber-500' :
+            'text-red-500'
+          }
+          pulseColorClass={
+            connectionState === ConnectionState.Connected ? 'bg-blue-500' :
+            connectionState === ConnectionState.Connecting ? 'bg-amber-400' :
+            'bg-red-400'
+          }
+        />
         <div className="flex gap-2 items-center">
           {/* Question session badge */}
           {questionsOpen && (
