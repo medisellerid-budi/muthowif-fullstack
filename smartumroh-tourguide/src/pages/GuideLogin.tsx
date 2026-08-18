@@ -7,8 +7,8 @@ import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const GuideLogin: React.FC = () => {
-  const [email, setEmail] = useState('guide@muthowif.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const history = useHistory();
   const { login } = useAuth();
   const [present] = useIonToast();
@@ -71,7 +71,7 @@ const GuideLogin: React.FC = () => {
                   </div>
                   <input
                     type="email"
-                    placeholder="guide@muthowif.com"
+                    placeholder="contoh@email.com"
                     className="input-field"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
