@@ -45,11 +45,11 @@ services:
       - "8651:8651"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8651/api/health"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8651/ > /dev/null 2>&1 || exit 1"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
 
   # LiveKit Server
   livekit:
@@ -63,7 +63,7 @@ services:
       - "7881:7881/udp"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7880/"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7880/ > /dev/null 2>&1 || exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -102,7 +102,6 @@ services:
     image: prodrigestivill/postgres-backup-local
     container_name: smartumroh-muthowif-db-backup-prod
     restart: unless-stopped
-    user: postgres:postgres
     volumes:
       - ./backups:/backups
     depends_on:
