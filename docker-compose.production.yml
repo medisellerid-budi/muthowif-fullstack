@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # Reverse Proxy Traefik (Auto HTTPS)
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # Global HTTP to HTTPS redirect
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    restart: unless-stopped
+
+  # Frontend Web
+  frontend:
+    build:
+      context: ./smartumroh-tourguide
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${BACKEND_URL}
+        VITE_LIVEKIT_URL: wss://${LIVEKIT_DOMAIN}
+    container_name: smartumroh-muthowif-app-prod
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    restart: unless-stopped
+
+  # Backend Next.js API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartumroh-backend-prod
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - db
+      - livekit
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.services.backend.loadbalancer.server.port=8651"
+    restart: unless-stopped
+
+  # LiveKit Server
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit-server-prod
+    command: --node-ip=0.0.0.0 --redis.address=redis:6379
+    environment:
+      - LIVEKIT_KEYS=${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
+    ports:
+      - "7881:7881/udp" # WebRTC UDP (Traefik tidak me-route UDP dengan mudah, langsung bind port)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.livekit.rule=Host(`${LIVEKIT_DOMAIN}`)"
+      - "traefik.http.routers.livekit.entrypoints=websecure"
+      - "traefik.http.routers.livekit.tls.certresolver=myresolver"
+      - "traefik.http.services.livekit.loadbalancer.server.port=7880"
+    restart: unless-stopped
+
+  # Redis (dibutuhkan LiveKit Production)
+  redis:
+    image: redis:7-alpine
+    container_name: livekit-redis-prod
+    restart: unless-stopped
+
+  # Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: smartumroh-muthowif-db-prod
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=StrongProdPassword123
+      - POSTGRES_DB=smartumroh
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:

@@ -1,0 +1,235 @@
+@import "tailwindcss";
+@import "@fontsource/geist-sans";
+
+@theme {
+  --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Hide scrollbars globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+ion-content::part(scroll) {
+  scrollbar-width: none;
+}
+
+ion-content::-webkit-scrollbar {
+  display: none;
+}
+
+@layer base {
+  :root {
+    --ion-font-family: "Geist Sans", ui-sans-serif, system-ui, sans-serif !important;
+    font-family: "Geist Sans", ui-sans-serif, system-ui, sans-serif !important;
+    font-size: 15px;
+  }
+
+  body, html, * {
+    font-family: "Geist Sans", ui-sans-serif, system-ui, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+
+  h1, .h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  h2, .h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+  }
+
+  h3, .h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  p {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.5;
+  }
+
+  :root {
+    /* Background & Foreground Text */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Border & Inputs */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    /* PRIMARY COLOR (Blue-600) */
+    --primary: 221.2 83.2% 53.3%; 
+    --primary-foreground: 210 40% 98%;
+
+    /* Muted (Untuk teks abu-abu elegan) */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --radius: 1rem;
+  }
+
+  /* ── Dark mode ────────────────────────────────────────────────── */
+  html.dark {
+    color-scheme: dark;
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 221.2 83.2% 53.3%;
+    --primary: 221.2 83.2% 60%;
+    --primary-foreground: 222 47% 8%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+  }
+
+  /* Ionic dark mode overrides */
+  html.dark ion-content {
+    --background: #0f172a !important;
+    --color: #f1f5f9;
+  }
+
+  html.dark {
+    --ion-background-color: #0f172a !important;
+    --ion-background-color-rgb: 15, 23, 42 !important;
+    --ion-text-color: #f1f5f9;
+    --ion-text-color-rgb: 241, 245, 249;
+    --ion-border-color: #1e293b;
+    --ion-item-background: #1e293b;
+    --ion-card-background: #1e293b;
+    --ion-toolbar-background: #0f172a;
+    --ion-tab-bar-background: #0f172a;
+  }
+
+  /* Override hardcoded tailwind colors for dark mode */
+  html.dark .bg-white {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+  html.dark .text-zinc-900, html.dark .text-zinc-800 {
+    color: #f8fafc !important;
+  }
+  html.dark .text-zinc-600, html.dark .text-zinc-500 {
+    color: #94a3b8 !important;
+  }
+  html.dark .text-zinc-400 {
+    color: #64748b !important;
+  }
+  html.dark .border-zinc-100, html.dark .border-zinc-200 {
+    border-color: #334155 !important;
+  }
+  html.dark .bg-blue-50 {
+    background-color: rgba(37, 99, 235, 0.1) !important;
+  }
+  html.dark .bg-blue-100 {
+    background-color: rgba(37, 99, 235, 0.2) !important;
+  }
+  html.dark .border-blue-100 {
+    border-color: rgba(37, 99, 235, 0.3) !important;
+  }
+  html.dark .bg-amber-50 {
+    background-color: rgba(217, 119, 6, 0.1) !important;
+  }
+  html.dark .border-amber-100, html.dark .border-amber-200 {
+    border-color: rgba(217, 119, 6, 0.3) !important;
+  }
+  html.dark .bg-red-50 {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+  }
+  html.dark .bg-zinc-50, html.dark .bg-zinc-100 {
+    background-color: #0f172a !important;
+  }
+
+  /* Overrides untuk Custom Component Classes (@layer components) */
+  html.dark .card-container {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+  }
+  html.dark .text-heading {
+    color: #f8fafc !important;
+  }
+  html.dark .text-content, html.dark .text-label {
+    color: #94a3b8 !important;
+  }
+  html.dark .input-field {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+  }
+  /* ─────────────────────────────────────────────────────────────── */
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.3); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@layer components {
+  /* Layout & Background */
+  .page-container {
+    @apply flex flex-col justify-center min-h-full h-full px-6 py-12;
+  }
+  
+  /* Cards */
+  .card-container {
+    @apply bg-white border-[1.5px] border-zinc-200 rounded-2xl p-6 shadow-sm;
+  }
+  
+  /* Typography */
+  .text-heading {
+    @apply text-xl font-semibold text-zinc-900 tracking-tight;
+  }
+  
+  .text-content {
+    @apply text-xs text-zinc-600 mt-1;
+  }
+
+  .text-label {
+    @apply block text-xs font-medium text-zinc-700 mb-1.5;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    @apply w-full h-12 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm;
+    border-radius: 1rem !important;
+  }
+  
+  .btn-danger {
+    @apply w-full h-12 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-sm;
+    border-radius: 1rem !important;
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full pl-9 pr-3 py-3 border border-zinc-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all;
+    border-radius: 1rem !important;
+  }
+}

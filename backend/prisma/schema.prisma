@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPERADMIN
+  GUIDE
+}
+
+enum AccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Guide {
+  id        String        @id @default(uuid())
+  name      String
+  email     String        @unique
+  password  String // bcrypt hashed
+  role      Role          @default(GUIDE)
+  status    AccountStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  sessions  TourSession[]
+}
+
+model TourSession {
+  id                   String                @id @default(uuid())
+  guideId              String
+  title                String
+  location             String?
+  status               SessionStatus         @default(SCHEDULED)
+  livekitRoomName      String                @unique
+  endsAt               DateTime?             // Session expiry — participants cannot join after this date
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  guide                Guide                 @relation(fields: [guideId], references: [id])
+  participants         SessionParticipant[]
+  expectedParticipants ExpectedParticipant[]
+}
+
+model SessionParticipant {
+  id        String      @id @default(uuid())
+  sessionId String
+  name      String
+  deviceId  String?     // Unique device identifier (Capacitor UUID / browser fallback)
+  joinedAt  DateTime    @default(now())
+  leftAt    DateTime?
+  session   TourSession @relation(fields: [sessionId], references: [id])
+
+  @@unique([sessionId, deviceId]) // 1 device hanya bisa join 1x per sesi
+}
+
+model ExpectedParticipant {
+  id        String            @id @default(uuid())
+  sessionId String
+  name      String
+  email     String?
+  status    ParticipantStatus @default(INVITED)
+  session   TourSession       @relation(fields: [sessionId], references: [id])
+}
+
+enum SessionStatus {
+  SCHEDULED
+  ACTIVE
+  ENDED
+}
+
+enum ParticipantStatus {
+  INVITED
+  JOINED
+}

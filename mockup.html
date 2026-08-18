@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartUmroh Tour Guide - Full Mockup 7 Pages</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Geist Font -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Geist', sans-serif;
+            background: #fafafa;
+            color: #09090b;
+        }
+        
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            background: #ffffff;
+            border-radius: 40px;
+            border: 10px solid #18181b;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+        }
+        
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #18181b;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+        
+        .phone-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 30px;
+            scrollbar-width: none;
+        }
+        
+        .phone-content::-webkit-scrollbar {
+            display: none;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.3); }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+    
+    <h1 class="text-2xl font-semibold text-zinc-900 mb-2 tracking-tight">
+        SmartUmroh Tour Guide
+    </h1>
+    <p class="text-sm text-zinc-500 mb-10">
+        Full Mockup • 7 Halaman • Clean White UI • Heroicons
+    </p>
+
+    <div class="flex flex-wrap gap-8 justify-center">
+        
+        <!-- ========== HALAMAN 1: ROLE SELECTION ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">1. Role Selection</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col justify-center min-h-full px-6 py-12">
+                        <div class="text-center mb-10">
+                            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center" style="animation: float 3s ease-in-out infinite;">
+                                <svg class="w-10 h-10 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.2L19 8.5v7l-7 3.9-7-3.9v-7L12 4.2zM12 6a2 2 0 100 4 2 2 0 000-4zm0 6c-2.2 0-4 1.8-4 4h8c0-2.2-1.8-4-4-4z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-semibold text-zinc-900 tracking-tight">SmartUmroh</h2>
+                            <p class="text-sm text-zinc-500 mt-1">Tour Guide System</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button class="w-full bg-white border border-zinc-200 rounded-xl p-5 flex items-center gap-4 hover:border-emerald-500 hover:shadow-md transition-all group">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V6a3 3 0 116 0v6.75a3 3 0 01-3 3z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 text-left">
+                                    <h3 class="text-sm font-semibold text-zinc-900">Tour Guide</h3>
+                                    <p class="text-xs text-zinc-500 mt-0.5">Pembimbing / Tour Leader</p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-600 mt-2">Perlu Login</span>
+                                </div>
+                                <svg class="w-5 h-5 text-zinc-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                </svg>
+                            </button>
+
+                            <button class="w-full bg-white border border-zinc-200 rounded-xl p-5 flex items-center gap-4 hover:border-amber-500 hover:shadow-md transition-all group">
+                                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 15v-3a8 8 0 0116 0v3m-16 0a2 2 0 002 2h1a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2zm16 0a2 2 0 01-2 2h-1a2 2 0 01-2-2v-2a2 2 0 012-2h1a2 2 0 012 2v2z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 text-left">
+                                    <h3 class="text-sm font-semibold text-zinc-900">Peserta</h3>
+                                    <p class="text-xs text-zinc-500 mt-0.5">Jamaah Umroh</p>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 mt-2">Tanpa Login</span>
+                                </div>
+                                <svg class="w-5 h-5 text-zinc-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <p class="text-center text-xs text-zinc-400 mt-6">💡 Peserta cukup masukkan kode akses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HALAMAN 2: GUIDE LOGIN ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">2. Guide Login</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col justify-center min-h-full px-6 py-12">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-xl font-semibold text-zinc-900 tracking-tight">Login Guide</h2>
+                            <p class="text-xs text-zinc-500 mt-1">Masuk untuk mengelola sesi tour</p>
+                        </div>
+
+                        <div class="bg-white border border-zinc-200 rounded-xl p-6 space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-700 mb-1.5">Email</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center">
+                                        <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+                                        </svg>
+                                    </div>
+                                    <input type="email" placeholder="ahmad@smartumroh.com" class="w-full pl-9 pr-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 transition-all">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-700 mb-1.5">Password</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center">
+                                        <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="password" placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 transition-all">
+                                </div>
+                            </div>
+                            <button class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors">Masuk</button>
+                            <p class="text-center text-xs text-zinc-400 pt-2">Demo: ahmad@smartumroh.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HALAMAN 3: DASHBOARD ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">3. Dashboard</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col min-h-full">
+                        <div class="px-6 py-5 border-b border-zinc-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-full bg-emerald-50 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-sm font-semibold text-zinc-900">Ustadz Ahmad Fauzi</h2>
+                                    <p class="text-xs text-zinc-500">ahmad@smartumroh.com</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 px-6 py-4">
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 text-center">
+                                <p class="text-lg font-bold text-emerald-600">2</p>
+                                <p class="text-[10px] text-zinc-500 mt-0.5">Sesi Aktif</p>
+                            </div>
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 text-center">
+                                <p class="text-lg font-bold text-emerald-600">45</p>
+                                <p class="text-[10px] text-zinc-500 mt-0.5">Total Peserta</p>
+                            </div>
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 text-center">
+                                <p class="text-lg font-bold text-emerald-600">12</p>
+                                <p class="text-[10px] text-zinc-500 mt-0.5">Online</p>
+                            </div>
+                        </div>
+
+                        <div class="px-6 pb-4">
+                            <button class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/>
+                                </svg>
+                                Buat Sesi Baru
+                            </button>
+                        </div>
+
+                        <div class="px-6 flex-1">
+                            <h3 class="text-xs font-semibold text-zinc-700 mb-2 uppercase tracking-wide">Sesi Aktif</h3>
+                            
+                            <div class="bg-white border border-zinc-200 rounded-lg p-4 mb-2 hover:border-emerald-500 transition-all cursor-pointer">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-semibold text-zinc-900">Grup Umroh A - Mei 2024</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-emerald-50 text-emerald-700">AKTIF</span>
+                                </div>
+                                <p class="text-xs font-mono text-emerald-600 mb-2">UMROH-ABC123</p>
+                                <div class="flex gap-3 text-[10px] text-zinc-500">
+                                    <span>👥 45 peserta</span>
+                                    <span>📅 15 Jun 2024</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-white border border-zinc-200 rounded-lg p-4 hover:border-emerald-500 transition-all cursor-pointer">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-semibold text-zinc-900">Grup Umroh B - Juni 2024</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-emerald-50 text-emerald-700">AKTIF</span>
+                                </div>
+                                <p class="text-xs font-mono text-emerald-600 mb-2">UMROH-DEF456</p>
+                                <div class="flex gap-3 text-[10px] text-zinc-500">
+                                    <span>👥 0 peserta</span>
+                                    <span>📅 15 Jul 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HALAMAN 4: SESSION DETAIL ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">4. Session Detail</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col min-h-full">
+                        <div class="px-6 py-4 border-b border-zinc-100 flex items-center gap-3">
+                            <svg class="w-5 h-5 text-zinc-500 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            <h2 class="text-sm font-semibold text-zinc-900">Detail Sesi</h2>
+                        </div>
+
+                        <div class="bg-white border border-zinc-200 rounded-xl mx-6 mt-4 p-5 text-center">
+                            <p class="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">Kode Akses</p>
+                            <p class="text-2xl font-bold font-mono text-emerald-600 tracking-widest">UMROH-ABC123</p>
+                            <button class="mt-2 text-[10px] text-zinc-400 hover:text-emerald-600 transition-colors">📋 Copy</button>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 px-6 py-4">
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 text-center">
+                                <p class="text-lg font-bold text-emerald-600">12</p>
+                                <p class="text-[10px] text-zinc-500">Online</p>
+                            </div>
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 text-center">
+                                <p class="text-lg font-bold text-zinc-900">45</p>
+                                <p class="text-[10px] text-zinc-500">Total</p>
+                            </div>
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 text-center">
+                                <p class="text-lg font-bold text-amber-600">33</p>
+                                <p class="text-[10px] text-zinc-500">Belum Join</p>
+                            </div>
+                        </div>
+
+                        <div class="flex mx-6 mb-3 bg-zinc-100 rounded-lg p-1">
+                            <span class="flex-1 text-center py-2 text-[10px] font-medium bg-white rounded-md text-emerald-600 shadow-sm">Online (12)</span>
+                            <span class="flex-1 text-center py-2 text-[10px] font-medium text-zinc-500">Sudah Join (45)</span>
+                            <span class="flex-1 text-center py-2 text-[10px] font-medium text-zinc-500">Belum Join (33)</span>
+                        </div>
+
+                        <div class="px-6 space-y-2 flex-1">
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center text-xs font-bold text-emerald-600">B</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-semibold text-zinc-900">Budi Santoso</p>
+                                    <p class="text-[10px] text-zinc-500">081234567001</p>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-emerald-50 text-emerald-700">ONLINE</span>
+                            </div>
+
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center text-xs font-bold text-emerald-600">S</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-semibold text-zinc-900">Siti Aminah</p>
+                                    <p class="text-[10px] text-zinc-500">081234567002</p>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-emerald-50 text-emerald-700">ONLINE</span>
+                            </div>
+
+                            <div class="bg-white border border-zinc-200 rounded-lg p-3 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">R</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-semibold text-zinc-900">Rina Marlina</p>
+                                    <p class="text-[10px] text-zinc-500">081234567004</p>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium bg-zinc-100 text-zinc-500">OFFLINE</span>
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-4">
+                            <button class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V6a3 3 0 116 0v6.75a3 3 0 01-3 3z"/>
+                                </svg>
+                                Mulai Broadcast
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HALAMAN 5: BROADCAST ROOM ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">5. Broadcast Room</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col items-center justify-center min-h-full px-6">
+                        <div class="flex items-center gap-2 mb-8">
+                            <span class="w-2 h-2 rounded-full bg-red-500" style="animation: pulse-dot 1.5s infinite;"></span>
+                            <span class="text-xs font-bold text-red-500 tracking-[0.3em]">LIVE</span>
+                        </div>
+
+                        <div class="w-28 h-28 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-50">
+                            <svg class="w-12 h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V6a3 3 0 116 0v6.75a3 3 0 01-3 3z"/>
+                            </svg>
+                        </div>
+
+                        <h2 class="text-lg font-semibold text-zinc-900 mb-1">Sedang Broadcast</h2>
+                        <p class="text-xs text-zinc-500 mb-8">45 peserta mendengarkan</p>
+
+                        <div class="flex items-end gap-1 h-12 mb-8">
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 30%; animation: wave 1s infinite;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 60%; animation: wave 0.8s infinite 0.1s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 100%; animation: wave 0.6s infinite 0.2s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 70%; animation: wave 0.7s infinite 0.3s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 40%; animation: wave 0.9s infinite 0.4s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 80%; animation: wave 0.7s infinite 0.5s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 50%; animation: wave 0.8s infinite 0.6s;"></div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button class="w-16 h-16 rounded-full bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center transition-colors shadow-lg shadow-emerald-100">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l5.25 5.25V9a3 3 0 00-3-3H8.25a.75.75 0 01-.53-.22L5.28 3.34A.75.75 0 004.75 3h-1.5a.75.75 0 00-.75.75v16.5c0 .414.336.75.75.75h1.5a.75.75 0 00.53-.22l2.44-2.44a.75.75 0 01.53-.22H12a3 3 0 003-3v-1.5"/>
+                                </svg>
+                            </button>
+                            <button class="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-colors shadow-lg shadow-red-100">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M6 6h12v12H6z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HALAMAN 6: PESERTA JOIN ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">6. Peserta Join</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col justify-center min-h-full px-6 py-12">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 15v-3a8 8 0 0116 0v3m-16 0a2 2 0 002 2h1a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2zm16 0a2 2 0 01-2 2h-1a2 2 0 01-2-2v-2a2 2 0 012-2h1a2 2 0 012 2v2z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-xl font-semibold text-zinc-900 tracking-tight">Gabung Sesi</h2>
+                            <p class="text-xs text-zinc-500 mt-1">Masukkan nama dan kode akses dari tour guide</p>
+                        </div>
+
+                        <div class="bg-white border border-zinc-200 rounded-xl p-6 space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-700 mb-1.5">Nama Anda</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center">
+                                        <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" placeholder="Contoh: Budi Santoso" class="w-full pl-9 pr-3 py-3 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 transition-all">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-zinc-700 mb-1.5">Kode Akses</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-3 flex items-center">
+                                        <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" placeholder="UMROH-XXXXXX" class="w-full pl-9 pr-3 py-3 border border-zinc-200 rounded-lg text-sm font-mono uppercase tracking-wider focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 transition-all">
+                                </div>
+                            </div>
+                            <button class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                </svg>
+                                Gabung Sesi
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-6">
+                            <p class="text-xs text-zinc-500">Tidak punya kode akses?</p>
+                            <p class="text-xs text-zinc-400 mt-1">Hubungi tour guide atau pembimbing umroh Anda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== HALAMAN 7: LISTENER ROOM ========== -->
+        <div>
+            <p class="text-xs text-zinc-500 mb-3 text-center font-medium">7. Listener Room</p>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-content bg-white">
+                    <div class="flex flex-col items-center justify-center min-h-full px-6">
+                        <!-- Status Indicator -->
+                        <div class="flex items-center gap-2 mb-6">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500" style="animation: pulse-dot 1.5s infinite;"></span>
+                            <span class="text-xs font-bold text-emerald-600 tracking-[0.3em]">TERHUBUNG</span>
+                        </div>
+
+                        <!-- Guide Info -->
+                        <div class="bg-white border border-zinc-200 rounded-xl px-5 py-4 flex items-center gap-3 mb-8 w-full max-w-xs">
+                            <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs font-semibold text-zinc-900">Ustadz Ahmad Fauzi</p>
+                                <p class="text-[10px] text-zinc-500">Sedang berbicara...</p>
+                            </div>
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/>
+                            </svg>
+                        </div>
+
+                        <!-- Headset Icon -->
+                        <div class="w-24 h-24 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-50">
+                            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 15v-3a8 8 0 0116 0v3m-16 0a2 2 0 002 2h1a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2zm16 0a2 2 0 01-2 2h-1a2 2 0 01-2-2v-2a2 2 0 012-2h1a2 2 0 012 2v2z"/>
+                            </svg>
+                        </div>
+
+                        <h2 class="text-lg font-semibold text-zinc-900 mb-1">Sedang Mendengarkan</h2>
+                        <p class="text-xs text-zinc-500 mb-8">Suara guide akan terdengar otomatis</p>
+
+                        <!-- Audio Wave -->
+                        <div class="flex items-end gap-1 h-12 mb-8">
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 30%; animation: wave 1s infinite;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 60%; animation: wave 0.8s infinite 0.1s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 100%; animation: wave 0.6s infinite 0.2s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 70%; animation: wave 0.7s infinite 0.3s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 40%; animation: wave 0.9s infinite 0.4s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 80%; animation: wave 0.7s infinite 0.5s;"></div>
+                            <div class="w-1 bg-emerald-500 rounded-full" style="height: 50%; animation: wave 0.8s infinite 0.6s;"></div>
+                        </div>
+
+                        <!-- Leave Button -->
+                        <button class="w-full max-w-xs py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                            </svg>
+                            Keluar dari Sesi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="text-xs text-zinc-400 mt-10 text-center">
+        💡 Simpan sebagai <code class="text-zinc-500">mockup.html</code> dan buka di browser
+    </p>
+</body>
+</html>

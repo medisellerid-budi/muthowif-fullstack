@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # LiveKit Server
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit-server
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+    environment:
+      - "LIVEKIT_KEYS=devkey: secretkey123"
+    command: --dev --node-ip=192.168.1.12
+    restart: unless-stopped
+
+  # Backend Next.js
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartumroh-backend
+    ports:
+      - "8651:8651"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/smartumroh
+      - LIVEKIT_URL=ws://localhost:7880
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secretkey123
+      - JWT_SECRET=smartumroh-secret-key-2024
+    depends_on:
+      - livekit
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: smartumroh-muthowif-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=smartumroh
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Redis (untuk LiveKit)
+  redis:
+    image: redis:7-alpine
+    container_name: livekit-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Frontend Ionic React
+  frontend:
+    build:
+      context: ./smartumroh-tourguide
+      dockerfile: Dockerfile
+    container_name: smartumroh-muthowif-app
+    ports:
+      - "8650:80"
+    environment:
+      - VITE_API_URL=http://localhost:8651
+      - VITE_LIVEKIT_URL=ws://localhost:7880
+    volumes:
+      - ./smartumroh-tourguide:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
