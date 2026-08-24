@@ -3,7 +3,7 @@ import { IonContent, IonPage, useIonAlert } from '@ionic/react';
 import { LiveKitRoom, RoomAudioRenderer, useLocalParticipant, useParticipants, useRoomContext } from '@livekit/components-react';
 import '@livekit/components-styles';
 import { useParams, useHistory } from 'react-router';
-import { MicrophoneIcon, HandRaisedIcon } from '@heroicons/react/24/outline';
+import { MicrophoneIcon, HandRaisedIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { SpeakerXMarkIcon, SpeakerWaveIcon, PhoneXMarkIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { api } from '../services/api';
 import { StatusIndicator } from '../components/StatusIndicator';
@@ -15,12 +15,137 @@ import { StopCircleIcon, PlayCircleIcon } from '@heroicons/react/24/outline';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
+// ─── Device Selector Component ───────────────────────────────────────────────
+interface MediaDevice { deviceId: string; label: string; }
+
+interface DeviceSelectorSheetProps {
+  onClose: () => void;
+  onMicChange: (deviceId: string) => void;
+  onSpeakerChange: (deviceId: string) => void;
+  selectedMicId: string;
+  selectedSpeakerId: string;
+}
+
+const DeviceSelectorSheet: React.FC<DeviceSelectorSheetProps> = ({
+  onClose, onMicChange, onSpeakerChange, selectedMicId, selectedSpeakerId
+}) => {
+  const [mics, setMics] = React.useState<MediaDevice[]>([]);
+  const [speakers, setSpeakers] = React.useState<MediaDevice[]>([]);
+
+  React.useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+      const micList = devices
+        .filter(d => d.kind === 'audioinput')
+        .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Microphone ${i + 1}` }));
+      const speakerList = devices
+        .filter(d => d.kind === 'audiooutput')
+        .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Speaker ${i + 1}` }));
+      setMics(micList);
+      setSpeakers(speakerList);
+    });
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+      <div
+        className="w-full bg-white rounded-t-3xl shadow-2xl px-5 pt-4 pb-8 max-h-[80vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-zinc-200 rounded-full mx-auto mb-4" />
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-zinc-900">Pengaturan Perangkat Audio</h3>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-zinc-100">
+            <XMarkIcon className="w-5 h-5 text-zinc-500" />
+          </button>
+        </div>
+
+        {/* Microphone */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <MicrophoneIcon className="w-4 h-4 text-zinc-500" />
+            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">Mikrofon</p>
+          </div>
+          <div className="space-y-1.5">
+            {mics.length === 0 && (
+              <p className="text-xs text-zinc-400 text-center py-2">Tidak ada mikrofon terdeteksi</p>
+            )}
+            {mics.map(mic => (
+              <button
+                key={mic.deviceId}
+                onClick={() => onMicChange(mic.deviceId)}
+                className={`w-full text-left px-3 py-2.5 rounded-2xl text-xs font-medium border transition-all ${
+                  selectedMicId === mic.deviceId
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-200'
+                }`}
+              >
+                <span className="mr-2">{selectedMicId === mic.deviceId ? '✓' : '○'}</span>
+                {mic.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Speaker */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <SpeakerWaveIcon className="w-4 h-4 text-zinc-500" />
+            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">Speaker / Headset</p>
+          </div>
+          <div className="space-y-1.5">
+            {speakers.length === 0 && (
+              <p className="text-xs text-zinc-400 text-center py-2">Speaker tidak dapat diubah di perangkat ini</p>
+            )}
+            {speakers.map(spk => (
+              <button
+                key={spk.deviceId}
+                onClick={() => onSpeakerChange(spk.deviceId)}
+                className={`w-full text-left px-3 py-2.5 rounded-2xl text-xs font-medium border transition-all ${
+                  selectedSpeakerId === spk.deviceId
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-200'
+                }`}
+              >
+                <span className="mr-2">{selectedSpeakerId === spk.deviceId ? '✓' : '○'}</span>
+                {spk.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Inner UI (needs LiveKit context) ────────────────────────────────────────
 const CustomRoomUI: React.FC<{ onHangup: () => void; guideName: string }> = ({ onHangup, guideName }) => {
   const room = useRoomContext();
   const { localParticipant, isMicrophoneEnabled } = useLocalParticipant();
   const participants = useParticipants();
   const listenerCount = Math.max(0, participants.length - 1);
+
+  // Device selector state
+  const [showDeviceSelector, setShowDeviceSelector] = React.useState(false);
+  const [selectedMicId, setSelectedMicId] = React.useState('default');
+  const [selectedSpeakerId, setSelectedSpeakerId] = React.useState('default');
+
+  const handleMicChange = async (deviceId: string) => {
+    setSelectedMicId(deviceId);
+    try {
+      await room.switchActiveDevice('audioinput', deviceId);
+    } catch (e) {
+      console.error('Failed to switch mic:', e);
+    }
+  };
+
+  const handleSpeakerChange = async (deviceId: string) => {
+    setSelectedSpeakerId(deviceId);
+    try {
+      await room.switchActiveDevice('audiooutput', deviceId);
+    } catch (e) {
+      console.error('Failed to switch speaker:', e);
+    }
+  };
 
   const {
     queue, questionsOpen,
@@ -49,9 +174,18 @@ const CustomRoomUI: React.FC<{ onHangup: () => void; guideName: string }> = ({ o
       <div className="px-6 pt-5 pb-4 border-b border-zinc-100">
         <div className="flex items-center justify-between">
           <StatusIndicator label="LIVE" colorClass="text-red-500" pulseColorClass="bg-red-500" />
-          <span className="text-xs text-zinc-500">
-            {listenerCount > 0 ? `${listenerCount} mendengarkan` : 'Menunggu peserta...'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500">
+              {listenerCount > 0 ? `${listenerCount} mendengarkan` : 'Menunggu peserta...'}
+            </span>
+            <button
+              onClick={() => setShowDeviceSelector(true)}
+              className="p-1.5 rounded-xl text-zinc-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+              title="Pengaturan Audio"
+            >
+              <Cog6ToothIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
         
         {/* Record status bar */}
@@ -162,6 +296,17 @@ const CustomRoomUI: React.FC<{ onHangup: () => void; guideName: string }> = ({ o
             </div>
           )}
         </div>
+      )}
+
+      {/* Device Selector Bottom Sheet */}
+      {showDeviceSelector && (
+        <DeviceSelectorSheet
+          onClose={() => setShowDeviceSelector(false)}
+          onMicChange={handleMicChange}
+          onSpeakerChange={handleSpeakerChange}
+          selectedMicId={selectedMicId}
+          selectedSpeakerId={selectedSpeakerId}
+        />
       )}
     </div>
   );

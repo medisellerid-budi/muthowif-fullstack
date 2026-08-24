@@ -90,7 +90,7 @@ services:
     container_name: smartumroh-muthowif-db-prod
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=StrongProdPassword123
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=smartumroh
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
@@ -116,7 +116,7 @@ services:
       - POSTGRES_HOST=db
       - POSTGRES_DB=smartumroh
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=StrongProdPassword123
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - SCHEDULE=@daily
       - BACKUP_KEEP_DAYS=7
 

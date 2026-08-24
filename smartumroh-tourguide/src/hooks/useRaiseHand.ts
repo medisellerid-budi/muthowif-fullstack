@@ -15,7 +15,12 @@ type RaiseHandMessage =
   | { type: 'OPEN_QUESTIONS' }
   | { type: 'CLOSE_QUESTIONS' };
 
-export function useRaiseHand(myName: string, isGuide: boolean) {
+interface UseRaiseHandOptions {
+  onCalled?: () => void;       // dipanggil ketika peserta ini dipanggil guide
+  onCallCleared?: () => void;  // dipanggil ketika panggilan selesai / tangan diturunkan
+}
+
+export function useRaiseHand(myName: string, isGuide: boolean, options: UseRaiseHandOptions = {}) {
   const room = useRoomContext();
   const [queue, setQueue] = useState<HandEntry[]>([]);
   const [iAmCalled, setIAmCalled] = useState(false);
@@ -42,7 +47,10 @@ export function useRaiseHand(myName: string, isGuide: boolean) {
           case 'CLOSE_QUESTIONS':
             setQuestionsOpen(false);
             setQueue([]);
-            setIAmCalled(false);
+            setIAmCalled(prev => {
+              if (prev) options.onCallCleared?.();
+              return false;
+            });
             break;
           case 'RAISE_HAND':
             setQueue(prev => {
@@ -53,23 +61,43 @@ export function useRaiseHand(myName: string, isGuide: boolean) {
             break;
           case 'LOWER_HAND':
             setQueue(prev => prev.filter(e => e.name !== msg.name));
-            if (msg.name === myName) setIAmCalled(false);
+            if (msg.name === myName) {
+              setIAmCalled(prev => {
+                if (prev) options.onCallCleared?.();
+                return false;
+              });
+            }
             break;
           case 'CALL_PARTICIPANT':
             setQueue(prev =>
               prev.map(e => e.name === msg.name ? { ...e, called: true } : { ...e, called: false })
             );
-            if (msg.name === myName) setIAmCalled(true);
+            if (msg.name === myName) {
+              setIAmCalled(true);
+              options.onCalled?.();
+            } else {
+              // Saya bukan yang dipanggil — matikan jika sebelumnya saya sedang berbicara
+              setIAmCalled(prev => {
+                if (prev) options.onCallCleared?.();
+                return false;
+              });
+            }
             break;
           case 'CLEAR_HAND':
             setQueue(prev => prev.filter(e => e.name !== msg.name));
-            if (msg.name === myName) setIAmCalled(false);
+            if (msg.name === myName) {
+              setIAmCalled(prev => {
+                if (prev) options.onCallCleared?.();
+                return false;
+              });
+            }
             break;
         }
       } catch {}
     };
     room.on('dataReceived', handler);
     return () => { room.off('dataReceived', handler); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, myName]);
 
   const raiseHand = useCallback(() => {
@@ -84,7 +112,11 @@ export function useRaiseHand(myName: string, isGuide: boolean) {
   const lowerHand = useCallback(() => {
     publish({ type: 'LOWER_HAND', name: myName });
     setQueue(prev => prev.filter(e => e.name !== myName));
-    setIAmCalled(false);
+    setIAmCalled(prev => {
+      if (prev) options.onCallCleared?.();
+      return false;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publish, myName]);
 
   const callParticipant = useCallback((name: string) => {

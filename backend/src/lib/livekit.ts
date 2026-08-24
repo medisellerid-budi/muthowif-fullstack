@@ -24,7 +24,9 @@ export async function createParticipantToken(
   at.addGrant({ 
     roomJoin: true, 
     room: roomName,
-    canPublish: isGuide,
+    // Semua peserta dapat canPublish: true agar bisa publish audio saat dipanggil guide.
+    // Mic tetap mati (muted) secara default dari sisi frontend.
+    canPublish: true,
     canSubscribe: true,
     canPublishData: true,
   });

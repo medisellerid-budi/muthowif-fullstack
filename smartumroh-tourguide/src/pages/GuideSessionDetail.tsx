@@ -86,7 +86,8 @@ const GuideSessionDetail: React.FC = () => {
   };
 
   const accessCode = session?.id ? session.id.split('-')[0].toUpperCase() : '';
-  const fullCode = accessCode ? `UMROH-${accessCode}` : '';
+  const prefix = session?.accessPrefix || 'TOUR';
+  const fullCode = accessCode ? `${prefix}-${accessCode}` : '';
   // Deep-link URL: opens ParticipantJoin with code pre-filled
   const joinUrl = accessCode
     ? `${window.location.origin}/participant/join?code=${accessCode}`

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { IonContent, IonPage, useIonToast } from '@ionic/react';
 import { useHistory } from 'react-router';
-import { PlusCircleIcon, MapPinIcon, TagIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { PlusCircleIcon, MapPinIcon, TagIcon, SunIcon, MoonIcon, KeyIcon } from '@heroicons/react/24/outline';
 import { ChevronLeftIcon } from '@heroicons/react/24/solid';
 import { api } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 const CreateSession: React.FC = () => {
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
+  const [accessPrefix, setAccessPrefix] = useState('');
   const [durationDays, setDurationDays] = useState(9); // Default 9 hari (durasi umroh)
   const history = useHistory();
   const [present] = useIonToast();
@@ -19,7 +20,7 @@ const CreateSession: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/sessions', { title, location, durationDays });
+      await api.post('/sessions', { title, location, durationDays, accessPrefix: accessPrefix || undefined });
       present({ message: 'Sesi berhasil dibuat! 🎉', duration: 2000, color: 'success' });
       history.replace('/guide/dashboard');
     } catch (e) {
@@ -96,8 +97,30 @@ const CreateSession: React.FC = () => {
                 </div>
               </div>
 
+              {/* Prefix Kode Akses */}
+              <div>
+                <label className="text-label">Prefix Kode Akses</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-3 flex items-center">
+                    <KeyIcon className="w-4 h-4 text-zinc-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Contoh: TRAVELXYZ atau PIBTOUR (opsional)"
+                    className="input-field"
+                    value={accessPrefix}
+                    maxLength={15}
+                    onChange={e => setAccessPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                  />
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1.5">
+                  Kode akses peserta: <span className="text-blue-600 font-semibold tracking-wide">{accessPrefix || 'TOUR'}-XXXXXXXX</span>
+                </p>
+              </div>
+
               {/* Submit Button */}
               {/* Durasi Sesi */}
+
               <div>
                 <label className="text-label">Durasi Sesi</label>
                 <div className="flex flex-wrap gap-2 mt-1">

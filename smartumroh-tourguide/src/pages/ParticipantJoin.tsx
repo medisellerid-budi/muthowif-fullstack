@@ -75,16 +75,17 @@ const ParticipantJoin: React.FC = () => {
               setSessionCode(code.toUpperCase());
               setScanning(false);
               controls.stop();
-              present({ message: `Kode ditemukan: UMROH-${code}`, duration: 2000, color: 'success' });
+              present({ message: `Kode ditemukan: ${code}`, duration: 2000, color: 'success' });
             }
           } catch {
-            // Not a URL — try using the raw text as a code
-            const rawCode = text.replace(/UMROH-/i, '').trim().toUpperCase();
+            // Not a URL — strip any PREFIX- before the suffix and use the raw suffix
+            // e.g. "TRAVELXYZ-A70780DB" → "A70780DB", "PIBTOUR-A70780" → "A70780"
+            const rawCode = text.replace(/^[A-Z0-9]+-/i, '').trim().toUpperCase();
             if (rawCode.length > 0) {
               setSessionCode(rawCode);
               setScanning(false);
               controls.stop();
-              present({ message: `Kode ditemukan: UMROH-${rawCode}`, duration: 2000, color: 'success' });
+              present({ message: `Kode ditemukan: ${rawCode}`, duration: 2000, color: 'success' });
             }
           }
         }
@@ -110,7 +111,8 @@ const ParticipantJoin: React.FC = () => {
     try {
       const res = await api.post('/join', {
         name,
-        sessionId: `UMROH-${sessionCode.toUpperCase()}`,
+        // Kirim suffix saja (tanpa prefix) — backend mencari berdasarkan UUID suffix
+        sessionId: sessionCode.toUpperCase(),
         deviceId,
       });
 
@@ -292,12 +294,13 @@ const ParticipantJoin: React.FC = () => {
                     </div>
                     <input 
                       type="text" 
-                      placeholder="Contoh: UMROH-A70780DB" 
+                      placeholder="Contoh: TRAVELXYZ-A70780DB"
                       className="input-field font-mono uppercase tracking-wider"
                       value={sessionCode}
                       onChange={e => {
-                        // Accept full code (UMROH-XXXXX) or just the suffix (XXXXX)
-                        const raw = e.target.value.toUpperCase().replace(/^UMROH-/, '');
+                        // Accept full code (PREFIX-SUFFIX) or just the suffix (SUFFIX)
+                        // Strip any prefix before the last '-' separator
+                        const raw = e.target.value.toUpperCase().replace(/^[A-Z0-9]+-/, '');
                         setSessionCode(raw);
                       }}
                       required

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { IonContent, IonPage, useIonAlert } from '@ionic/react';
-import { LiveKitRoom, RoomAudioRenderer, useParticipants, useConnectionState, useRoomContext } from '@livekit/components-react';
+import { LiveKitRoom, RoomAudioRenderer, useParticipants, useConnectionState, useRoomContext, useLocalParticipant } from '@livekit/components-react';
 import { ConnectionState } from 'livekit-client';
 import '@livekit/components-styles';
 import { useHistory } from 'react-router';
-import { UserCircleIcon, UsersIcon, SpeakerWaveIcon, HandRaisedIcon } from '@heroicons/react/24/outline';
-import { SpeakerWaveIcon as SpeakerWaveSolid, ArrowRightOnRectangleIcon, HandRaisedIcon as HandRaisedSolid } from '@heroicons/react/24/solid';
+import { UserCircleIcon, UsersIcon, SpeakerWaveIcon, HandRaisedIcon, Cog6ToothIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
+import { SpeakerWaveIcon as SpeakerWaveSolid, ArrowRightOnRectangleIcon, HandRaisedIcon as HandRaisedSolid, XMarkIcon } from '@heroicons/react/24/solid';
 import { StatusIndicator } from '../components/StatusIndicator';
 import { AudioWave } from '../components/AudioWave';
 import { useRaiseHand } from '../hooks/useRaiseHand';
@@ -13,12 +13,124 @@ import { KeepAwake } from '@capacitor-community/keep-awake';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
+// ─── Device Selector Component ───────────────────────────────────────────────
+interface MediaDevice { deviceId: string; label: string; }
+
+interface DeviceSelectorSheetProps {
+  onClose: () => void;
+  onMicChange: (deviceId: string) => void;
+  onSpeakerChange: (deviceId: string) => void;
+  selectedMicId: string;
+  selectedSpeakerId: string;
+}
+
+const DeviceSelectorSheet: React.FC<DeviceSelectorSheetProps> = ({
+  onClose, onMicChange, onSpeakerChange, selectedMicId, selectedSpeakerId
+}) => {
+  const [mics, setMics] = useState<MediaDevice[]>([]);
+  const [speakers, setSpeakers] = useState<MediaDevice[]>([]);
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+      const micList = devices
+        .filter(d => d.kind === 'audioinput')
+        .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Microphone ${i + 1}` }));
+      const speakerList = devices
+        .filter(d => d.kind === 'audiooutput')
+        .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Speaker ${i + 1}` }));
+      setMics(micList);
+      setSpeakers(speakerList);
+    });
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+      <div
+        className="w-full bg-white rounded-t-3xl shadow-2xl px-5 pt-4 pb-8 max-h-[80vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Handle bar */}
+        <div className="w-10 h-1 bg-zinc-200 rounded-full mx-auto mb-4" />
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-zinc-900">Pengaturan Perangkat Audio</h3>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-zinc-100">
+            <XMarkIcon className="w-5 h-5 text-zinc-500" />
+          </button>
+        </div>
+
+        {/* Microphone */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <MicrophoneIcon className="w-4 h-4 text-zinc-500" />
+            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">Mikrofon</p>
+          </div>
+          <div className="space-y-1.5">
+            {mics.length === 0 && (
+              <p className="text-xs text-zinc-400 text-center py-2">Tidak ada mikrofon terdeteksi</p>
+            )}
+            {mics.map(mic => (
+              <button
+                key={mic.deviceId}
+                onClick={() => onMicChange(mic.deviceId)}
+                className={`w-full text-left px-3 py-2.5 rounded-2xl text-xs font-medium border transition-all ${
+                  selectedMicId === mic.deviceId
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-200'
+                }`}
+              >
+                <span className="mr-2">{selectedMicId === mic.deviceId ? '✓' : '○'}</span>
+                {mic.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Speaker */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <SpeakerWaveIcon className="w-4 h-4 text-zinc-500" />
+            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">Speaker / Headset</p>
+          </div>
+          <div className="space-y-1.5">
+            {speakers.length === 0 && (
+              <p className="text-xs text-zinc-400 text-center py-2">Speaker tidak dapat diubah di perangkat ini</p>
+            )}
+            {speakers.map(spk => (
+              <button
+                key={spk.deviceId}
+                onClick={() => onSpeakerChange(spk.deviceId)}
+                className={`w-full text-left px-3 py-2.5 rounded-2xl text-xs font-medium border transition-all ${
+                  selectedSpeakerId === spk.deviceId
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-200'
+                }`}
+              >
+                <span className="mr-2">{selectedSpeakerId === spk.deviceId ? '✓' : '○'}</span>
+                {spk.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Inner component (needs LiveKit context) ────────────────────────────────
 const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLeave, myName }) => {
   const [tab, setTab] = useState<'listen' | 'people'>('listen');
   const participants = useParticipants();
   const room = useRoomContext();
+  const { localParticipant } = useLocalParticipant();
   const connectionState = useConnectionState();
+
+  // Device selector state
+  const [showDeviceSelector, setShowDeviceSelector] = useState(false);
+  const [selectedMicId, setSelectedMicId] = useState('default');
+  const [selectedSpeakerId, setSelectedSpeakerId] = useState('default');
+
+  // Mic state (peserta) — hanya aktif saat dipanggil guide
+  const [isMicActive, setIsMicActive] = useState(false);
 
   // iOS Safari requires a user gesture to start audio playback
   const [audioBlocked, setAudioBlocked] = useState(false);
@@ -43,10 +155,8 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   }, [connectionState]);
 
   // ── Android APK: App state change (background → foreground) ────────────
-  // Capacitor's appStateChange is more reliable than visibilitychange on APK.
-  // When app resumes from background, check if AudioContext needs re-unlock.
   useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return; // only for APK, not PWA
+    if (!Capacitor.isNativePlatform()) return;
 
     const listenerPromise = App.addListener('appStateChange', ({ isActive }) => {
       if (isActive && connectionState === ConnectionState.Connected) {
@@ -62,15 +172,13 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   }, [connectionState]);
 
   // ── iOS: Re-unlock audio when app comes back from background/lock screen ──
-  // iOS suspends AudioContext when user switches apps or locks screen.
-  // We listen to visibilitychange to re-prompt unlock if needed.
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && connectionState === ConnectionState.Connected) {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
         if (ctx.state === 'suspended') {
           setAudioBlocked(true);
-          audioCheckDone.current = false; // allow re-check
+          audioCheckDone.current = false;
         }
         ctx.close();
       }
@@ -81,12 +189,8 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
   }, [connectionState]);
 
   const unlockAudio = () => {
-    // Resume all suspended audio contexts (LiveKit uses them internally)
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    ctx.resume().then(() => {
-      ctx.close();
-    });
-    // Trigger room's startAudio to unblock LiveKit audio
+    ctx.resume().then(() => { ctx.close(); });
     room.startAudio().then(() => {
       setAudioBlocked(false);
     }).catch(() => {
@@ -94,12 +198,50 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
     });
   };
 
+  // ── Callback: aktifkan mic saat dipanggil guide ──────────────────────────
+  const handleCalled = useCallback(() => {
+    if (!localParticipant) return;
+    localParticipant.setMicrophoneEnabled(true).catch(console.error);
+    setIsMicActive(true);
+  }, [localParticipant]);
+
+  // ── Callback: matikan mic saat panggilan selesai ─────────────────────────
+  const handleCallCleared = useCallback(() => {
+    if (!localParticipant) return;
+    localParticipant.setMicrophoneEnabled(false).catch(console.error);
+    setIsMicActive(false);
+  }, [localParticipant]);
+
   const {
     queue, isHandRaised, myPosition, iAmCalled, questionsOpen,
     raiseHand, lowerHand,
-  } = useRaiseHand(myName, false);
+  } = useRaiseHand(myName, false, {
+    onCalled: handleCalled,
+    onCallCleared: handleCallCleared,
+  });
 
-  // Guide = publisher with canPublish permission
+  // ── Device change handlers ───────────────────────────────────────────────
+  const handleMicChange = async (deviceId: string) => {
+    setSelectedMicId(deviceId);
+    try {
+      // Switch mic device via LiveKit room
+      await room.switchActiveDevice('audioinput', deviceId);
+    } catch (e) {
+      console.error('Failed to switch mic:', e);
+    }
+  };
+
+  const handleSpeakerChange = async (deviceId: string) => {
+    setSelectedSpeakerId(deviceId);
+    try {
+      // Switch speaker device via LiveKit room
+      await room.switchActiveDevice('audiooutput', deviceId);
+    } catch (e) {
+      console.error('Failed to switch speaker:', e);
+    }
+  };
+
+  // Guide = publisher with canPublish permission AND named 'guide'
   const guideParticipant = participants.find(p => !p.isLocal && p.permissions?.canPublish);
   const otherParticipants = participants.filter(p => p !== guideParticipant);
 
@@ -201,6 +343,14 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
               ✋ Pertanyaan Terbuka
             </span>
           )}
+          {/* Device settings */}
+          <button
+            onClick={() => setShowDeviceSelector(true)}
+            className="p-2 rounded-xl text-zinc-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+            title="Pengaturan Audio"
+          >
+            <Cog6ToothIcon className="w-5 h-5" />
+          </button>
           <button
             onClick={() => setTab('listen')}
             className={`p-2 rounded-xl transition-colors ${tab === 'listen' ? 'bg-blue-50 text-blue-600' : 'text-zinc-400'}`}
@@ -245,9 +395,18 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
 
           {/* Notification: called to speak */}
           {iAmCalled && (
-            <div className="mt-4 w-full max-w-xs bg-blue-50 border border-blue-300 rounded-2xl p-3 text-center animate-pulse">
+            <div className="mt-4 w-full max-w-xs bg-blue-50 border border-blue-300 rounded-2xl p-4 text-center">
+              <div className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${isMicActive ? 'bg-green-100 animate-pulse' : 'bg-blue-100'}`}>
+                <MicrophoneIcon className={`w-6 h-6 ${isMicActive ? 'text-green-600' : 'text-blue-600'}`} />
+              </div>
               <p className="text-sm font-semibold text-blue-700">🎙️ Silakan Anda berbicara!</p>
               <p className="text-xs text-blue-600 mt-0.5">Guide mempersilahkan Anda bertanya</p>
+              {isMicActive && (
+                <div className="mt-2 flex items-center justify-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] font-medium text-green-600">Mikrofon Aktif</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -354,11 +513,28 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
               </div>
               <div className="flex-1">
                 <p className="text-xs font-medium text-zinc-800">{myName} (Anda)</p>
+                {isMicActive && (
+                  <p className="text-[10px] text-green-600 flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    Mikrofon aktif
+                  </p>
+                )}
               </div>
               {isHandRaised && <HandRaisedSolid className="w-4 h-4 text-amber-500" />}
             </div>
           )}
         </div>
+      )}
+
+      {/* Device Selector Bottom Sheet */}
+      {showDeviceSelector && (
+        <DeviceSelectorSheet
+          onClose={() => setShowDeviceSelector(false)}
+          onMicChange={handleMicChange}
+          onSpeakerChange={handleSpeakerChange}
+          selectedMicId={selectedMicId}
+          selectedSpeakerId={selectedSpeakerId}
+        />
       )}
     </div>
   );
@@ -390,12 +566,11 @@ const ParticipantRoom: React.FC = () => {
   };
 
   // ── Android: intercept hardware back button ───────────────────────────────
-  // Without this, pressing back on Android exits the room without confirmation.
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
     const listenerPromise = App.addListener('backButton', () => {
-      handleLeave(); // show confirm dialog instead of navigating back directly
+      handleLeave();
     });
     return () => { listenerPromise.then(l => l.remove()); };
   // eslint-disable-next-line react-hooks/exhaustive-deps

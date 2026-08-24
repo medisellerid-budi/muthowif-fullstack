@@ -150,7 +150,7 @@ const GuideDashboard: React.FC = () => {
 
                     {/* Row 2: kode akses */}
                     <p className="text-sm font-medium tracking-widest text-blue-600 mb-2">
-                      UMROH-{s.id.split('-')[0].toUpperCase()}
+                      {(s.accessPrefix || 'TOUR')}-{s.id.split('-')[0].toUpperCase()}
                     </p>
 
                     {/* Row 3: meta info + Akhiri Sesi button */}

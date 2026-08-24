@@ -9,18 +9,30 @@ export async function POST(request: Request) {
     const participantName: string = body.name || body.participantName;
     const deviceId: string | undefined = body.deviceId;
 
-    // Accept full UUID or 'UMROH-XXXXXX' format where XXXXXX is the UUID prefix
+    // Accept full code (PREFIX-SUFFIX) or just the UUID suffix
+    // e.g. "TRAVELXYZ-A70780DB" → suffix = "a70780db"
+    //      "PIBTOUR-A70780DB"   → suffix = "a70780db"
+    //      "A70780DB"           → suffix = "a70780db"
     let sessionId: string = body.sessionId || '';
-    if (sessionId.startsWith('UMROH-')) {
-      // Frontend sends UMROH-{first-6-chars-of-UUID}, find matching session
-      const prefix = sessionId.replace('UMROH-', '').toLowerCase();
-      const session = await prisma.tourSession.findFirst({
-        where: { id: { startsWith: prefix } }
-      });
-      if (!session) {
-        return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    if (sessionId.includes('-')) {
+      // Strip any prefix before the last '-' segment that looks like a UUID fragment
+      // Support both single-segment UUID prefix (A70780DB) and multi-hyphen UUID (full UUID)
+      // Strategy: if last part after final '-' is alphanumeric ≤8 chars → it's a suffix
+      const parts = sessionId.split('-');
+      const lastPart = parts[parts.length - 1];
+      // If last segment is short (≤8 chars) and alphanumeric → it's the UUID suffix
+      // Otherwise treat the entire string as a full UUID
+      if (/^[A-Z0-9]{1,8}$/i.test(lastPart) && parts.length >= 2) {
+        const suffix = lastPart.toLowerCase();
+        const session = await prisma.tourSession.findFirst({
+          where: { id: { startsWith: suffix } }
+        });
+        if (!session) {
+          return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+        }
+        sessionId = session.id;
       }
-      sessionId = session.id;
+      // else: treat as a full UUID — pass through to findUnique below
     }
 
     if (!sessionId || !participantName) {

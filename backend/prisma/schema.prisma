@@ -37,6 +37,7 @@ model TourSession {
   guideId              String
   title                String
   location             String?
+  accessPrefix         String                @default("TOUR") // Prefix kode akses kustom, misal: TRAVELXYZ, PIBTOUR
   status               SessionStatus         @default(SCHEDULED)
   livekitRoomName      String                @unique
   endsAt               DateTime?             // Session expiry — participants cannot join after this date
