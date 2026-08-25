@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export function middleware(request: Request) {
+export function proxy(request: Request) {
   const origin = request.headers.get("origin") || "*";
 
   if (request.method === "OPTIONS") {

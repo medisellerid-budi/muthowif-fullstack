@@ -1,22 +1,26 @@
+import React, { lazy, Suspense } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { NetworkBanner } from './components/NetworkBanner';
-import React from 'react';
+import { PWAPrompt } from './components/PWAPrompt';
 
-import RoleSelection from './pages/RoleSelection';
-import GuideLogin from './pages/GuideLogin';
-import GuideRegister from './pages/GuideRegister';
-import GuideDashboard from './pages/GuideDashboard';
-import CreateSession from './pages/CreateSession';
-import GuideSessionDetail from './pages/GuideSessionDetail';
-import AddExpectedParticipants from './pages/AddExpectedParticipants';
-import SuperadminDashboard from './pages/SuperadminDashboard';
-import GuideRoom from './pages/GuideRoom';
-import ParticipantJoin from './pages/ParticipantJoin';
-import ParticipantRoom from './pages/ParticipantRoom';
+// ─── Lazy-loaded pages ────────────────────────────────────────────────────────
+// Halaman hanya diunduh saat rute pertama kali diakses,
+// sehingga bundle awal tetap kecil dan loading pertama lebih cepat.
+const RoleSelection           = lazy(() => import('./pages/RoleSelection'));
+const GuideLogin              = lazy(() => import('./pages/GuideLogin'));
+const GuideRegister           = lazy(() => import('./pages/GuideRegister'));
+const GuideDashboard          = lazy(() => import('./pages/GuideDashboard'));
+const CreateSession           = lazy(() => import('./pages/CreateSession'));
+const GuideSessionDetail      = lazy(() => import('./pages/GuideSessionDetail'));
+const AddExpectedParticipants = lazy(() => import('./pages/AddExpectedParticipants'));
+const SuperadminDashboard     = lazy(() => import('./pages/SuperadminDashboard'));
+const GuideRoom               = lazy(() => import('./pages/GuideRoom'));
+const ParticipantJoin         = lazy(() => import('./pages/ParticipantJoin'));
+const ParticipantRoom         = lazy(() => import('./pages/ParticipantRoom'));
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -42,7 +46,14 @@ import './global.css';
 
 setupIonicReact();
 
-/** Guard component — redirects unauthenticated users to /guide/login */
+// ─── Fallback spinner saat halaman sedang diload ──────────────────────────────
+const PageLoader: React.FC = () => (
+  <div className="flex items-center justify-center h-full">
+    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+// ─── Guard component — redirect unauthenticated users to /guide/login ─────────
 const PrivateRoute: React.FC<{ component: React.FC; path: string; exact?: boolean }> = ({
   component: Component,
   ...rest
@@ -52,9 +63,7 @@ const PrivateRoute: React.FC<{ component: React.FC; path: string; exact?: boolea
   if (loading) {
     return (
       <Route {...rest}>
-        <div className="flex items-center justify-center h-full">
-          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <PageLoader />
       </Route>
     );
   }
@@ -69,8 +78,6 @@ const PrivateRoute: React.FC<{ component: React.FC; path: string; exact?: boolea
   );
 };
 
-import { PWAPrompt } from './components/PWAPrompt';
-
 const App: React.FC = () => (
   <ThemeProvider>
     <IonApp>
@@ -78,38 +85,40 @@ const App: React.FC = () => (
       <PWAPrompt />
       <AuthProvider>
         <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/">
-            <RoleSelection />
-          </Route>
-          
-          <Route exact path="/guide/login">
-            <GuideLogin />
-          </Route>
+          <Suspense fallback={<PageLoader />}>
+            <IonRouterOutlet>
+              <Route exact path="/">
+                <RoleSelection />
+              </Route>
 
-          <Route exact path="/guide/register">
-            <GuideRegister />
-          </Route>
+              <Route exact path="/guide/login">
+                <GuideLogin />
+              </Route>
 
-          {/* Protected guide routes */}
-          <PrivateRoute exact path="/guide/admin" component={SuperadminDashboard} />
-          <PrivateRoute exact path="/guide/dashboard" component={GuideDashboard} />
-          <PrivateRoute exact path="/guide/create-session" component={CreateSession} />
-          <PrivateRoute path="/guide/session/:id" component={GuideSessionDetail} exact />
-          <PrivateRoute path="/guide/session/:id/expected" component={AddExpectedParticipants} exact />
-          <PrivateRoute path="/guide/room/:id" component={GuideRoom} exact />
+              <Route exact path="/guide/register">
+                <GuideRegister />
+              </Route>
 
-          <Route exact path="/participant/join">
-            <ParticipantJoin />
-          </Route>
-          <Route exact path="/participant/room/:id">
-            <ParticipantRoom />
-          </Route>
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </AuthProvider>
-  </IonApp>
-</ThemeProvider>
+              {/* Protected guide routes */}
+              <PrivateRoute exact path="/guide/admin"               component={SuperadminDashboard} />
+              <PrivateRoute exact path="/guide/dashboard"           component={GuideDashboard} />
+              <PrivateRoute exact path="/guide/create-session"      component={CreateSession} />
+              <PrivateRoute exact path="/guide/session/:id"         component={GuideSessionDetail} />
+              <PrivateRoute exact path="/guide/session/:id/expected" component={AddExpectedParticipants} />
+              <PrivateRoute exact path="/guide/room/:id"            component={GuideRoom} />
+
+              <Route exact path="/participant/join">
+                <ParticipantJoin />
+              </Route>
+              <Route exact path="/participant/room/:id">
+                <ParticipantRoom />
+              </Route>
+            </IonRouterOutlet>
+          </Suspense>
+        </IonReactRouter>
+      </AuthProvider>
+    </IonApp>
+  </ThemeProvider>
 );
 
 export default App;

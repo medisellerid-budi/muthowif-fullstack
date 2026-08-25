@@ -119,7 +119,7 @@ muthowifApp/
 | ~~**Network Error production (CORS duplikat)**~~ | ~~`backend/next.config.ts`~~ | ✅ **FIXED** — `next.config.ts` dan `middleware.ts` dua-duanya set `Access-Control-Allow-Origin`, browser reject duplikat. Dihapus dari `next.config.ts` |
 | ~~**Tidak ada suara (LiveKit)**~~ | ~~`docker-compose.production.yml`~~ | ✅ **FIXED** — LiveKit pakai UDP port random yang tidak di-expose Docker. Diperbaiki dengan `livekit.yaml` + `udp_port: 7881` |
 | ~~**ICE candidates gagal (WebRTC)**~~ | ~~LiveKit `--node-ip`~~ | ✅ **FIXED** — `--node-ip=0.0.0.0` diganti `--node-ip=31.97.67.77` (IP public VPS) |
-| **Ukuran backup database** | `backups/` dir di VPS | ⏳ **PENDING** — Strategi manajemen disk agar backup tidak overflow VPS |
+| ~~**Ukuran backup database**~~ | ~~`backups/` dir di VPS~~ | ✅ **FIXED** — Teratasi oleh `BACKUP_KEEP_DAYS=7` di Docker |
 
 ---
 
@@ -263,6 +263,6 @@ CORS dihandle **HANYA** oleh `src/middleware.ts`. Jangan tambahkan CORS headers 
 
 | Item | Prioritas | Status |
 |---|---|---|
-| **Manajemen ukuran backup database** | 🔴 Operasional | ⏳ Pending — strategi agar `./backups/` tidak overflow disk VPS |
-| **Rekaman sesi** | 🟢 Rendah | Belum — LiveKit Egress recording |
-| **Analytics dashboard** | 🟢 Rendah | Belum — statistik per sesi |
+| **Manajemen ukuran backup database** | 🔴 Operasional | ✅ **DONE** — Teratasi oleh `BACKUP_KEEP_DAYS=7` di `docker-compose.production.yml` |
+| **Rekaman sesi** | 🟢 Rendah | ⏳ Belum — LiveKit Egress recording |
+| **Analytics dashboard** | 🟢 Rendah | ⏳ Belum — statistik per sesi |

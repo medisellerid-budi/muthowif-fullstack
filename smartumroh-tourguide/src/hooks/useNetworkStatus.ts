@@ -1,24 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
- * Hook untuk mendeteksi status koneksi internet.
+ * Hook untuk mendeteksi status koneksi internet browser.
+ *
+ * ⚠️ navigator.onLine TIDAK reliable di Android WebView & beberapa mobile browser:
+ *   - Bisa false saat pertama load meskipun ada koneksi
+ *   - Hanya cek apakah network interface aktif, bukan internet sungguhan
+ *
+ * Solusi: default ke `true` (optimistic) — banner hanya muncul jika event
+ * 'offline' benar-benar diterima dari browser, bukan dari nilai awal onLine.
+ *
  * Returns { isOnline, wasOffline }
- * - isOnline: status koneksi saat ini
- * - wasOffline: true jika sebelumnya offline (berguna untuk menampilkan banner "kembali online")
+ * - isOnline:   false hanya saat event 'offline' diterima
+ * - wasOffline: true sementara setelah kembali online (untuk banner "kembali pulih")
  */
 export const useNetworkStatus = () => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  // Default `true` agar banner tidak muncul saat pertama load.
+  // Banner merah hanya tampil jika event 'offline' sungguhan diterima.
+  const [isOnline, setIsOnline] = useState(true);
   const [wasOffline, setWasOffline] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const clearTimer = () => {
+      if (timerRef.current !== null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+
     const handleOnline = () => {
+      clearTimer();
       setIsOnline(true);
       setWasOffline(true);
-      // Reset "wasOffline" setelah 3 detik (cukup untuk tampilkan banner)
-      setTimeout(() => setWasOffline(false), 3000);
+      // Sembunyikan banner "kembali pulih" setelah 3 detik
+      timerRef.current = setTimeout(() => setWasOffline(false), 3000);
     };
 
     const handleOffline = () => {
+      clearTimer();
       setIsOnline(false);
       setWasOffline(false);
     };
@@ -29,6 +49,7 @@ export const useNetworkStatus = () => {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      clearTimer();
     };
   }, []);
 

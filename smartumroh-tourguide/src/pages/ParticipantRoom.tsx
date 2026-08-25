@@ -5,116 +5,15 @@ import { ConnectionState } from 'livekit-client';
 import '@livekit/components-styles';
 import { useHistory } from 'react-router';
 import { UserCircleIcon, UsersIcon, SpeakerWaveIcon, HandRaisedIcon, Cog6ToothIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
-import { SpeakerWaveIcon as SpeakerWaveSolid, ArrowRightOnRectangleIcon, HandRaisedIcon as HandRaisedSolid, XMarkIcon } from '@heroicons/react/24/solid';
+import { SpeakerWaveIcon as SpeakerWaveSolid, ArrowRightOnRectangleIcon, HandRaisedIcon as HandRaisedSolid } from '@heroicons/react/24/solid';
 import { StatusIndicator } from '../components/StatusIndicator';
 import { AudioWave } from '../components/AudioWave';
+import { DeviceSelectorSheet } from '../components/DeviceSelectorSheet';
 import { useRaiseHand } from '../hooks/useRaiseHand';
+import { useAudioDevices } from '../hooks/useAudioDevices';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-
-// ─── Device Selector Component ───────────────────────────────────────────────
-interface MediaDevice { deviceId: string; label: string; }
-
-interface DeviceSelectorSheetProps {
-  onClose: () => void;
-  onMicChange: (deviceId: string) => void;
-  onSpeakerChange: (deviceId: string) => void;
-  selectedMicId: string;
-  selectedSpeakerId: string;
-}
-
-const DeviceSelectorSheet: React.FC<DeviceSelectorSheetProps> = ({
-  onClose, onMicChange, onSpeakerChange, selectedMicId, selectedSpeakerId
-}) => {
-  const [mics, setMics] = useState<MediaDevice[]>([]);
-  const [speakers, setSpeakers] = useState<MediaDevice[]>([]);
-
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then(devices => {
-      const micList = devices
-        .filter(d => d.kind === 'audioinput')
-        .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Microphone ${i + 1}` }));
-      const speakerList = devices
-        .filter(d => d.kind === 'audiooutput')
-        .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Speaker ${i + 1}` }));
-      setMics(micList);
-      setSpeakers(speakerList);
-    });
-  }, []);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
-      <div
-        className="w-full bg-white rounded-t-3xl shadow-2xl px-5 pt-4 pb-8 max-h-[80vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Handle bar */}
-        <div className="w-10 h-1 bg-zinc-200 rounded-full mx-auto mb-4" />
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-zinc-900">Pengaturan Perangkat Audio</h3>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-zinc-100">
-            <XMarkIcon className="w-5 h-5 text-zinc-500" />
-          </button>
-        </div>
-
-        {/* Microphone */}
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-2">
-            <MicrophoneIcon className="w-4 h-4 text-zinc-500" />
-            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">Mikrofon</p>
-          </div>
-          <div className="space-y-1.5">
-            {mics.length === 0 && (
-              <p className="text-xs text-zinc-400 text-center py-2">Tidak ada mikrofon terdeteksi</p>
-            )}
-            {mics.map(mic => (
-              <button
-                key={mic.deviceId}
-                onClick={() => onMicChange(mic.deviceId)}
-                className={`w-full text-left px-3 py-2.5 rounded-2xl text-xs font-medium border transition-all ${
-                  selectedMicId === mic.deviceId
-                    ? 'bg-blue-50 border-blue-300 text-blue-700'
-                    : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-200'
-                }`}
-              >
-                <span className="mr-2">{selectedMicId === mic.deviceId ? '✓' : '○'}</span>
-                {mic.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Speaker */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <SpeakerWaveIcon className="w-4 h-4 text-zinc-500" />
-            <p className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">Speaker / Headset</p>
-          </div>
-          <div className="space-y-1.5">
-            {speakers.length === 0 && (
-              <p className="text-xs text-zinc-400 text-center py-2">Speaker tidak dapat diubah di perangkat ini</p>
-            )}
-            {speakers.map(spk => (
-              <button
-                key={spk.deviceId}
-                onClick={() => onSpeakerChange(spk.deviceId)}
-                className={`w-full text-left px-3 py-2.5 rounded-2xl text-xs font-medium border transition-all ${
-                  selectedSpeakerId === spk.deviceId
-                    ? 'bg-blue-50 border-blue-300 text-blue-700'
-                    : 'bg-white border-zinc-200 text-zinc-700 hover:border-blue-200'
-                }`}
-              >
-                <span className="mr-2">{selectedSpeakerId === spk.deviceId ? '✓' : '○'}</span>
-                {spk.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ─── Inner component (needs LiveKit context) ────────────────────────────────
 const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLeave, myName }) => {
@@ -126,8 +25,7 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
 
   // Device selector state
   const [showDeviceSelector, setShowDeviceSelector] = useState(false);
-  const [selectedMicId, setSelectedMicId] = useState('default');
-  const [selectedSpeakerId, setSelectedSpeakerId] = useState('default');
+  const { selectedMicId, selectedSpeakerId, handleMicChange, handleSpeakerChange } = useAudioDevices(room);
 
   // Mic state (peserta) — hanya aktif saat dipanggil guide
   const [isMicActive, setIsMicActive] = useState(false);
@@ -220,26 +118,6 @@ const ParticipantUI: React.FC<{ onLeave: () => void; myName: string }> = ({ onLe
     onCallCleared: handleCallCleared,
   });
 
-  // ── Device change handlers ───────────────────────────────────────────────
-  const handleMicChange = async (deviceId: string) => {
-    setSelectedMicId(deviceId);
-    try {
-      // Switch mic device via LiveKit room
-      await room.switchActiveDevice('audioinput', deviceId);
-    } catch (e) {
-      console.error('Failed to switch mic:', e);
-    }
-  };
-
-  const handleSpeakerChange = async (deviceId: string) => {
-    setSelectedSpeakerId(deviceId);
-    try {
-      // Switch speaker device via LiveKit room
-      await room.switchActiveDevice('audiooutput', deviceId);
-    } catch (e) {
-      console.error('Failed to switch speaker:', e);
-    }
-  };
 
   // Guide = publisher with canPublish permission AND named 'guide'
   const guideParticipant = participants.find(p => !p.isLocal && p.permissions?.canPublish);
