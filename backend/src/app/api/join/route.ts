@@ -33,7 +33,19 @@ export async function POST(request: Request) {
         sessionId = session.id;
       }
       // else: treat as a full UUID — pass through to findUnique below
+    } else if (sessionId.length <= 8 && /^[A-Z0-9]+$/i.test(sessionId)) {
+      // Pure suffix code tanpa prefix (misal: "C76494B2" dari URL param, QR scan, atau input langsung)
+      // Cari sesi yang UUID-nya diawali dengan suffix ini
+      const suffix = sessionId.toLowerCase();
+      const session = await prisma.tourSession.findFirst({
+        where: { id: { startsWith: suffix } }
+      });
+      if (!session) {
+        return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+      }
+      sessionId = session.id;
     }
+
 
     if (!sessionId || !participantName) {
       return NextResponse.json({ error: 'Missing sessionId or name' }, { status: 400 });
