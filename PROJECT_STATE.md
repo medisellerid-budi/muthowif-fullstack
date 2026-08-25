@@ -120,6 +120,10 @@ muthowifApp/
 | ~~**Tidak ada suara (LiveKit)**~~ | ~~`docker-compose.production.yml`~~ | ✅ **FIXED** — LiveKit pakai UDP port random yang tidak di-expose Docker. Diperbaiki dengan `livekit.yaml` + `udp_port: 7881` |
 | ~~**ICE candidates gagal (WebRTC)**~~ | ~~LiveKit `--node-ip`~~ | ✅ **FIXED** — `--node-ip=0.0.0.0` diganti `--node-ip=31.97.67.77` (IP public VPS) |
 | ~~**Ukuran backup database**~~ | ~~`backups/` dir di VPS~~ | ✅ **FIXED** — Teratasi oleh `BACKUP_KEEP_DAYS=7` di Docker |
+| ~~**Banner "Koneksi Terputus" salah status**~~ | ~~`useNetworkStatus.ts`~~ | ✅ **FIXED** — Default status `true` dan bergantung pada event `offline` browser agar tidak false-positive saat WebView Android pertama load |
+| ~~**Peserta "Session Not Found" dari QR/URL**~~ | ~~`api/join/route.ts`~~ | ✅ **FIXED** — Kode suffix murni (tanpa prefix/hyphen) salah masuk blok full-UUID. Diperbaiki dengan menambah blok lookup awalan (`startsWith`) untuk 8 karakter alfanumerik |
+| ~~**Ukuran build besar & Circular Dependency**~~ | ~~`App.tsx` & `vite.config.ts`~~ | ✅ **FIXED** — Refactoring menggunakan `React.lazy`/`Suspense` untuk routes dan `manualChunks` untuk library vendor (LiveKit, ZXing) |
+| ~~**Logika audio device duplicate**~~ | ~~`GuideRoom` & `ParticipantRoom`~~ | ✅ **FIXED** — Diekstrak ke custom hook `useAudioDevices.ts` agar kode lebih DRY dan terpusat |
 
 ---
 
